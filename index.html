@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f1f5f9" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+    <title>Zenith Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="/manifest.json" />
+     <link rel="apple-touch-icon" href="/icon-192.png">
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "uuid": "https://aistudiocdn.com/uuid@^11.1.0"
+  }
+}
+</script>
+<script>
+    // Support automatic dark mode
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+</script>
+</head>
+  <body class="bg-slate-100 dark:bg-slate-900 transition-colors duration-300">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+    <script>
+      // Quick and dirty way to get some icons for the manifest without extra files
+      function generateIcon(size, bgColor, textColor) {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // Background
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, size, size);
+
+        // Text (Simple Z for Zenith)
+        ctx.fillStyle = textColor;
+        ctx.font = `${size * 0.6}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Z', size / 2, size / 2 + size*0.05);
+
+        return canvas.toDataURL();
+      }
+
+      function addIconToHead(href, sizes) {
+        const link = document.createElement('link');
+        link.rel = 'icon';
+        link.href = href;
+        link.sizes = sizes;
+        document.head.appendChild(link);
+      }
+      
+      // Use in-memory generated icons for the PWA manifest if they are not found.
+      // This is a workaround for single-file env.
+      fetch('/icon-192.png').catch(() => {
+          const icon192 = generateIcon(192, '#4f46e5', '#ffffff');
+          const manifest = document.querySelector('link[rel="manifest"]');
+          const newManifest = {
+              ...JSON.parse(JSON.stringify(manifest)), // a bit hacky
+              "icons": [
+                { "src": icon192, "type": "image/png", "sizes": "192x192" },
+                { "src": generateIcon(512, '#4f46e5', '#ffffff'), "type": "image/png", "sizes": "512x512" }
+              ]
+          };
+          const blob = new Blob([JSON.stringify(newManifest)], {type: 'application/json'});
+          manifest.href= URL.createObjectURL(blob);
+          const appleTouchIcon = document.querySelector('link[rel="apple-touch-icon"]');
+          if(appleTouchIcon) appleTouchIcon.href = icon192;
+      });
+      
+    </script>
+  </body>
+</html>
