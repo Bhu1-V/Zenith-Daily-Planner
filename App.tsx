@@ -4,7 +4,8 @@ import Planner from './components/Planner';
 import { DayReviewModal } from './components/DayReviewModal';
 import { ConfirmationDialog } from './components/ConfirmationDialog';
 import { HelpSection } from './components/HelpSection';
-import { DateIcon, ArrowLeftIcon, ArrowRightIcon, CheckCircleIcon, ResetIcon, CheckIcon } from './components/icons';
+import { DatePicker } from './components/DatePicker';
+import { CheckCircleIcon, ResetIcon, CheckIcon } from './components/icons';
 import { CheckboxTask, CheckboxWithTextTask } from './types';
 
 const App: React.FC = () => {
@@ -20,11 +21,7 @@ const App: React.FC = () => {
     nextDay.setDate(currentDate.getDate() + 1);
     setCurrentDate(nextDay);
   };
-  const goToPreviousDay = () => {
-    const prevDay = new Date(currentDate);
-    prevDay.setDate(currentDate.getDate() - 1);
-    setCurrentDate(prevDay);
-  };
+
   const goToToday = () => {
     setCurrentDate(new Date());
   };
@@ -68,15 +65,7 @@ const App: React.FC = () => {
     setIsConfirmResetOpen(false);
   };
 
-  const isToday = new Date().toDateString() === currentDate.toDateString();
   const isLocked = !!dailyPlan?.review;
-
-  const formattedDate = currentDate.toLocaleString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
 
   if (isLoading) {
     return (
@@ -91,25 +80,11 @@ const App: React.FC = () => {
       <main className="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8">
         <header className="mb-8">
           <h1 className="text-4xl font-bold text-slate-900 dark:text-white text-center tracking-tight">Zenith Planner</h1>
-          <div className="flex items-center justify-center mt-4">
-            <button onClick={goToPreviousDay} aria-label="Previous day" className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors">
-              <ArrowLeftIcon className="w-5 h-5" />
-            </button>
-            <div className="flex items-center justify-center mx-4 text-lg text-slate-500 dark:text-slate-400">
-                <DateIcon className="w-5 h-5 mr-2" />
-                <p>{formattedDate}</p>
-            </div>
-            <button onClick={goToNextDay} aria-label="Next day" className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 transition-colors">
-              <ArrowRightIcon className="w-5 h-5" />
-            </button>
-          </div>
-           {!isToday && (
-              <div className="text-center mt-2">
-                <button onClick={goToToday} className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">
-                  Jump to Today
-                </button>
-              </div>
-            )}
+          <DatePicker 
+            currentDate={currentDate}
+            setCurrentDate={setCurrentDate}
+            goToToday={goToToday}
+          />
         </header>
 
         <HelpSection />
@@ -154,7 +129,6 @@ const App: React.FC = () => {
                     className="w-full flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-slate-700 hover:bg-slate-800 dark:bg-slate-600 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 dark:focus:ring-offset-slate-900"
                     >
                     Review & Plan Next Day
-                    <ArrowRightIcon className="w-5 h-5 ml-3" />
                 </button>
             ) : null}
         </div>
