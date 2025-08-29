@@ -1,4 +1,3 @@
-
 {
   "short_name": "Zenith",
   "name": "Zenith Planner",
@@ -7,7 +6,8 @@
     {
       "src": "/icon.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ],
   "start_url": ".",
