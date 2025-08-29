@@ -1,10 +1,11 @@
 
-const CACHE_NAME = 'zenith-planner-v4';
+const CACHE_NAME = 'zenith-planner-v5';
 const ASSETS_TO_CACHE = [
   // Core App Shell
   '/',
   '/index.html',
   '/manifest.json',
+  '/icon.svg',
   
   // Scripts - All local modules
   '/index.tsx',
