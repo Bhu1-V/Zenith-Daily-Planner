@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { DailyPlan, PlannerData, Task, UniversalTrackers, ItemType, CheckboxTask, TextTask, PlannerSectionData, DayReview } from '../types';
 import { getWeekdayTemplate, getWeekendTemplate, getDefaultTrackers, COLOR_PALETTE } from '../constants';
+import { loadPlannerData, savePlannerData } from '../utils/storage';
 
 const formatDateToKey = (date: Date): string => {
   return date.toISOString().split('T')[0];
@@ -58,15 +59,19 @@ const usePlannerData = (date: Date) => {
   const dailyPlan = plannerData[dateKey];
 
   useEffect(() => {
-    try {
-      const storedData = localStorage.getItem('zenithPlannerData');
-      if (storedData) {
-        setPlannerData(JSON.parse(storedData));
+    const loadData = async () => {
+      try {
+        const storedData = await loadPlannerData();
+        if (storedData) {
+          setPlannerData(storedData);
+        }
+      } catch (error) {
+        console.error("Failed to load data from IndexedDB", error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to load data from localStorage", error);
-    }
-    setIsLoading(false);
+    };
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -113,13 +118,14 @@ const usePlannerData = (date: Date) => {
     setSaveStatus('saving');
 
     const handler = setTimeout(() => {
-      try {
-        localStorage.setItem('zenithPlannerData', JSON.stringify(plannerData));
-        setSaveStatus('saved');
-      } catch (error) {
-        console.error("Failed to save data to localStorage", error);
-        setSaveStatus('idle'); // Could be an 'error' state
-      }
+      savePlannerData(plannerData)
+        .then(() => {
+          setSaveStatus('saved');
+        })
+        .catch(error => {
+          console.error("Failed to save data to IndexedDB", error);
+          setSaveStatus('idle'); // Could be an 'error' state
+        });
     }, 1000); // Debounce for 1 second
 
     return () => {
@@ -314,7 +320,7 @@ const usePlannerData = (date: Date) => {
     });
   }, [dateKey]);
 
-  return { dailyPlan, updateTask, updateTracker, addTask, removeTask, isLoading, confirmCurrentPlan, addSection, removeSection, updateSection, updateAllSections, updateDayReview, resetDayReview, saveStatus };
+  return { dailyPlan, plannerData, updateTask, updateTracker, addTask, removeTask, isLoading, confirmCurrentPlan, addSection, removeSection, updateSection, updateAllSections, updateDayReview, resetDayReview, saveStatus };
 };
 
 // Mock uuid for environments where crypto is not available.

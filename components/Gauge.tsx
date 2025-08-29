@@ -10,15 +10,11 @@ interface GaugeProps {
 const ANIMATION_DURATION = 1000; // ms
 
 export const Gauge: React.FC<GaugeProps> = ({ value, label, size = 120, strokeWidth = 10 }) => {
-  // State for the SVG arc transition. We start at 0 and transition to the target value.
   const [displayValue, setDisplayValue] = useState(0);
-  // State for the number counting up animation.
   const [animatedNumber, setAnimatedNumber] = useState(0);
   const animationFrameId = useRef<number | null>(null);
 
   useEffect(() => {
-    // Trigger the CSS transition for the SVG arc after the component has mounted.
-    // Using a timeout of 0 pushes this to the next event loop tick.
     const timer = setTimeout(() => {
       setDisplayValue(value);
     }, 0);
@@ -27,7 +23,6 @@ export const Gauge: React.FC<GaugeProps> = ({ value, label, size = 120, strokeWi
   }, [value]);
 
   useEffect(() => {
-    // Animate the number counting up
     const startValue = animatedNumber;
     const endValue = value;
     let startTime: number | null = null;
@@ -74,41 +69,44 @@ export const Gauge: React.FC<GaugeProps> = ({ value, label, size = 120, strokeWi
   const strokeOffset = arcLength * (1 - (displayValue / 100));
 
   const valueColorClass = value >= 80 ? 'text-emerald-500' : value >= 50 ? 'text-amber-500' : 'text-rose-500';
+  const fillValueColorClass = value >= 80 ? 'fill-emerald-500' : value >= 50 ? 'fill-amber-500' : 'fill-rose-500';
   
   return (
     <div className="flex flex-col items-center">
       <div className="relative" style={{ width: size, height: size }}>
-        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-[225deg]">
-          {/* Background track */}
-          <circle
-            cx={center}
-            cy={center}
-            r={radius}
-            fill="transparent"
-            stroke="currentColor"
-            strokeWidth={strokeWidth}
-            strokeDasharray={arcLength}
-            strokeDashoffset={0}
-            className="text-slate-200 dark:text-slate-700"
-          />
-          {/* Value arc */}
-          <circle
-            cx={center}
-            cy={center}
-            r={radius}
-            fill="transparent"
-            stroke="currentColor"
-            strokeWidth={strokeWidth}
-            strokeDasharray={arcLength}
-            strokeDashoffset={strokeOffset}
-            strokeLinecap="round"
-            className={`${valueColorClass} transition-all duration-1000 ease-out`}
-            style={{ transitionProperty: 'stroke-dashoffset' }}
-          />
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          <g transform={`rotate(-225 ${center} ${center})`}>
+            {/* Background track */}
+            <circle
+              cx={center}
+              cy={center}
+              r={radius}
+              fill="transparent"
+              stroke="currentColor"
+              strokeWidth={strokeWidth}
+              strokeDasharray={arcLength}
+              strokeDashoffset={0}
+              className="text-slate-200 dark:text-slate-700"
+            />
+            {/* Value arc */}
+            <circle
+              cx={center}
+              cy={center}
+              r={radius}
+              fill="transparent"
+              stroke="currentColor"
+              strokeWidth={strokeWidth}
+              strokeDasharray={arcLength}
+              strokeDashoffset={strokeOffset}
+              strokeLinecap="round"
+              className={`${valueColorClass} transition-all duration-1000 ease-out`}
+              style={{ transitionProperty: 'stroke-dashoffset' }}
+            />
+          </g>
+          <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className={`text-3xl font-bold tabular-nums ${fillValueColorClass}`}>
+            {Math.round(animatedNumber)}%
+          </text>
         </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={`text-3xl font-bold tabular-nums ${valueColorClass}`}>{Math.round(animatedNumber)}%</span>
-        </div>
       </div>
       <p className="text-sm font-semibold text-slate-600 dark:text-slate-400 mt-2">{label}</p>
     </div>

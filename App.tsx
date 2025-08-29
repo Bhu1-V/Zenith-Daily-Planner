@@ -6,7 +6,7 @@ import { ConfirmationDialog } from './components/ConfirmationDialog';
 import { HelpSection } from './components/HelpSection';
 import { DatePicker } from './components/DatePicker';
 import { CheckCircleIcon, ResetIcon, CheckIcon } from './components/icons';
-import { CheckboxTask, CheckboxWithTextTask } from './types';
+import { CheckboxTask, CheckboxWithTextTask, PlannerData } from './types';
 
 const App: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -14,7 +14,7 @@ const App: React.FC = () => {
   const [isConfirmResetOpen, setIsConfirmResetOpen] = useState(false);
   const [productivityScores, setProductivityScores] = useState({ signal: 0, absolute: 0 });
 
-  const { dailyPlan, updateTask, updateTracker, addTask, removeTask, isLoading, confirmCurrentPlan, addSection, removeSection, updateSection, updateAllSections, updateDayReview, resetDayReview, saveStatus } = usePlannerData(currentDate);
+  const { dailyPlan, plannerData, updateTask, updateTracker, addTask, removeTask, isLoading, confirmCurrentPlan, addSection, removeSection, updateSection, updateAllSections, updateDayReview, resetDayReview, saveStatus } = usePlannerData(currentDate);
 
   const goToNextDay = () => {
     const nextDay = new Date(currentDate);
@@ -84,6 +84,7 @@ const App: React.FC = () => {
             currentDate={currentDate}
             setCurrentDate={setCurrentDate}
             goToToday={goToToday}
+            plannerData={plannerData}
           />
         </header>
 

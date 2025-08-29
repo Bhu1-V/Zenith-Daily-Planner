@@ -1,11 +1,10 @@
 
-const CACHE_NAME = 'zenith-planner-v1';
+const CACHE_NAME = 'zenith-planner-v2';
 const URLS_TO_CACHE = [
   '/',
   '/index.html',
+  '/manifest.json',
   'https://cdn.tailwindcss.com',
-  // Note: In a real build, you would add your JS and CSS bundle files here.
-  // Since this is a single file setup, we cache the essentials.
 ];
 
 self.addEventListener('install', (event) => {
@@ -15,17 +14,45 @@ self.addEventListener('install', (event) => {
         console.log('Opened cache');
         return cache.addAll(URLS_TO_CACHE);
       })
+      .then(() => self.skipWaiting()) // Activate new SW immediately
   );
 });
 
 self.addEventListener('fetch', (event) => {
+  // Ignore non-GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request)
-      .then((response) => {
-        if (response) {
-          return response;
+      .then((cachedResponse) => {
+        // Cache hit - return response
+        if (cachedResponse) {
+          return cachedResponse;
         }
-        return fetch(event.request);
+
+        // Not in cache - fetch and cache
+        return fetch(event.request).then(
+          (response) => {
+            // Check if we received a valid response
+            if (!response || response.status !== 200 || (response.type !== 'basic' && response.type !== 'cors')) {
+              return response;
+            }
+
+            // Clone the response
+            const responseToCache = response.clone();
+
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                 if (!event.request.url.startsWith('chrome-extension://')) {
+                    cache.put(event.request, responseToCache);
+                 }
+              });
+
+            return response;
+          }
+        );
       })
   );
 });
@@ -42,5 +69,6 @@ self.addEventListener('activate', (event) => {
         })
       );
     })
+    .then(() => self.clients.claim()) // Take control of open pages
   );
 });
