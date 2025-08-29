@@ -1,18 +1,50 @@
 
-const CACHE_NAME = 'zenith-planner-v3';
-const URLS_TO_CACHE = [
+const CACHE_NAME = 'zenith-planner-v4';
+const ASSETS_TO_CACHE = [
+  // Core App Shell
   '/',
   '/index.html',
   '/manifest.json',
+  
+  // Scripts - All local modules
+  '/index.tsx',
+  '/App.tsx',
+  '/types.ts',
+  '/constants.ts',
+  '/hooks/usePlannerData.ts',
+  '/utils/storage.ts',
+  '/utils/time.ts',
+  '/components/ConfirmationDialog.tsx',
+  '/components/DatePicker.tsx',
+  '/components/DayReviewModal.tsx',
+  '/components/DayReviewSummary.tsx',
+  '/components/FocusSection.tsx',
+  '/components/Gauge.tsx',
+  '/components/HelpSection.tsx',
+  '/components/icons.tsx',
+  '/components/Planner.tsx',
+  '/components/PlannerSection.tsx',
+  '/components/TaskItem.tsx',
+  '/components/TimelineScheduler.tsx',
+  '/components/UniversalTracker.tsx',
+
+  // External Dependencies
   'https://cdn.tailwindcss.com',
+  'https://aistudiocdn.com/react@^19.1.1',
+  'https://aistudiocdn.com/react-dom@^19.1.1/client',
+  'https://aistudiocdn.com/uuid@^11.1.0',
+  'https://aistudiocdn.com/react@^19.1.1/jsx-runtime',
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(URLS_TO_CACHE);
+        console.log('Opened cache and caching all required assets for offline use.');
+        return cache.addAll(ASSETS_TO_CACHE);
+      })
+      .catch(error => {
+          console.error('Failed to cache core assets during install:', error);
       })
       .then(() => self.skipWaiting()) // Activate new SW immediately
   );
